@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+
+message Status {
+  float temperature = 1;
+}
