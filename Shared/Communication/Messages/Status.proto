@@ -2,5 +2,6 @@ syntax = "proto3";
 
 
 message Status {
-  float temperature = 1;
+  string topic = 1;
+  float temperature = 2;
 }
