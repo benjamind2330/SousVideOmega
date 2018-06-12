@@ -1,11 +1,10 @@
-#
-#   Weather update client
-#   Connects SUB socket to tcp://localhost:5556
-#   Collects weather updates and finds avg temp in zipcode
-#
+import os, sys, zmq
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../src/Communication"))
 
-import sys
-import zmq
+print ("Adding path: " + os.path.join(os.path.dirname(__file__), "../../src/Communication"))
+
+from Messages import Status_pb2
+
 
 #  Socket to talk to server
 context = zmq.Context()
@@ -14,21 +13,12 @@ socket = context.socket(zmq.SUB)
 print("Collecting status updates from the sous vide…")
 socket.connect("tcp://localhost:5556")
 
-# Subscribe to zipcode, default is NYC, 10001
-zip_filter = sys.argv[1] if len(sys.argv) > 1 else "10001"
+stat_filter = ""
 
-# Python 2 - ascii bytes to unicode str
-if isinstance(zip_filter, bytes):
-    zip_filter = zip_filter.decode('ascii')
-socket.setsockopt_string(zmq.SUBSCRIBE, zip_filter)
+socket.setsockopt_string(zmq.SUBSCRIBE, stat_filter)
 
-# Process 5 updates
-total_temp = 0
-for update_nbr in range(5):
-    string = socket.recv_string()
-    zipcode, temperature, relhumidity = string.split()
-    total_temp += int(temperature)
-
-print("Average temperature for zipcode '%s' was %dF" % (
-      zip_filter, total_temp / (update_nbr+1))
-)
+while (True):
+    packet_content = socket.recv()
+    packet = Status_pb2.Status()
+    packet.ParseFromString(packet_content)
+    print ("Current Temp " + str(packet.temperature))

@@ -8,12 +8,14 @@ from Communication.Messages import Status_pb2
 
 class Publisher (threading.Thread):
 
+    STATUS_TOPIC_NAME = "SV_Stat"
+
     def __init__(self, rate, context):
         threading.Thread.__init__(self)
         self.rate = rate;
         self.last_temp = 0.0
         self.statusSocket = context.socket(zmq.PUB)
-        socket.bind("tcp://*:5556")
+        self.statusSocket.bind("tcp://*:5556")
 
     def generateStatusMessage(self):
         status = Status_pb2.Status()
@@ -25,5 +27,6 @@ class Publisher (threading.Thread):
         while (True):
             start = time.time()
             status = self.generateStatusMessage();
-            self.socket.send(status.SerializeToString())
+            print("%s %s" % (self.STATUS_TOPIC_NAME, status.SerializeToString()))
+            self.statusSocket.send(status.SerializeToString())
             time.sleep(max(1.0/self.rate - (time.time() - start), 0))
