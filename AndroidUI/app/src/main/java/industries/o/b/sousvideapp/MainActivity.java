@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_MESSAGE = "industries.o.b.sousvideapp.MESSAGE";
@@ -24,16 +28,33 @@ public class MainActivity extends AppCompatActivity {
         // Example of a call to a native method
         //TextView tv = (TextView) findViewById(R.id.sample_text);
         //tv.setText(stringFromJNI());
+
+
+        TextView temp = (TextView)findViewById(R.id.textViewTemperature);
+        temp.setText("0.0");
+
+        SV_comms.connect();
+
+        SV_comms.start();
+
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                updateViews();
+            }
+        }, 0, 200, TimeUnit.MILLISECONDS);
+
     }
 
-    public void sendMessage(View view)
-    {
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = findViewById(R.id.editText);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
+    private void updateViews() {
+        SousVideCommunications.SousVideStatus stat = SV_comms.get_currentStatus();
+        TextView temp = (TextView)findViewById(R.id.textViewTemperature);
+        temp.setText(Float.toString(stat.temperature));
     }
+
+
+    private SousVideCommunications SV_comms = new SousVideCommunications();
 
     /**
      * A native method that is implemented by the 'native-lib' native library,
