@@ -12,11 +12,11 @@ WATER_SPECIFIC_HEAT = 4.186
 
 class WaterBathEmulator (threading.Thread):
 
-    def __init__(self, waterAmount, initialTempreture, heatingElement, pumpControl):
+    def __init__(self, waterAmount, initialTempreture, heatingElement, pumpControl, speedUpTime):
         threading.Thread.__init__(self)
         self.water_L = waterAmount #L
         self.currentTemp = initialTempreture #deg_C
-        self.loopDelay = 1 #s
+        self.loopDelay = 1/speedUpTime #s
         self.heatingElement = heatingElement
         self.pumpControl = pumpControl
         random.seed()
